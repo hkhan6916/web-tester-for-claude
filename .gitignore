@@ -1,0 +1,17 @@
+node_modules
+runs
+reports
+*.log
+.env
+.env.local
+.DS_Store
+
+# Personal Claude Code settings — machine-local, never commit (contains your
+# own permission allowlist / other-project references).
+.claude/settings.local.json
+
+# Run artifacts if you point web-tester at this repo
+.web-tester/
+
+# npm pack output
+*.tgz

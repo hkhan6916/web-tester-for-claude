@@ -1,0 +1,64 @@
+{
+  "name": "web-tester-for-claude",
+  "version": "0.4.0",
+  "description": "Drive your dev site in Playwright, map it, capture console + network + DOM + screenshots + video, write one structured report. Built for AI coding agents and humans.",
+  "keywords": [
+    "playwright",
+    "ai",
+    "claude",
+    "claude-code",
+    "agent",
+    "agent-skill",
+    "browser-automation",
+    "testing",
+    "qa",
+    "e2e",
+    "crawler",
+    "sitemap",
+    "regression",
+    "report"
+  ],
+  "license": "MIT",
+  "author": "hkhan6916",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkhan6916/web-tester-for-claude.git"
+  },
+  "homepage": "https://github.com/hkhan6916/web-tester-for-claude#readme",
+  "bugs": "https://github.com/hkhan6916/web-tester-for-claude/issues",
+  "type": "commonjs",
+  "bin": {
+    "web-tester": "./bin/web-tester.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "tsconfig.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "web-tester": "tsx src/cli.ts",
+    "init": "tsx src/cli.ts init",
+    "map": "tsx src/cli.ts map",
+    "inspect": "tsx src/cli.ts inspect",
+    "kb": "tsx src/cli.ts kb",
+    "tsc": "tsc --noEmit",
+    "prepublishOnly": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "playwright": "^1.59.1",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.41",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

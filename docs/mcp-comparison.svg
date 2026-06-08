@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="314" viewBox="0 0 960 314" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif'>
+<style>
+ .title{font-size:16px;font-weight:700;fill:#1c1917} .sub{font-size:12px;fill:#78716c}
+ .task{font-size:13.5px;font-weight:600;fill:#1c1917} .side{font-size:12px;fill:#78716c}
+ .val{font-size:12px;fill:#78716c;font-variant-numeric:tabular-nums} .ax{font-size:11px;fill:#a8a29e;font-variant-numeric:tabular-nums}
+ .grid{stroke:#e7e5e4;stroke-width:1} .leg{font-size:12px;fill:#78716c} .end{font-weight:700;font-size:13px}
+</style>
+<rect width="960" height="314" rx="10" fill="#fafaf9"/><text x="28" y="34" class="title">Tokens read to finish the same task</text>
+<text x="28" y="54" class="sub">Lower is better. Measured on two real pages.</text>
+<rect x="28" y="70" width="12" height="12" rx="3" fill="#c2660c"/><text x="46" y="80" class="leg">Playwright MCP</text>
+<rect x="168" y="70" width="12" height="12" rx="3" fill="#15803d"/><text x="186" y="80" class="leg">web-tester</text>
+<text x="28" y="116" class="task">TodoMVC: add 3 todos, complete one, filter</text>
+<text x="156" y="145" class="side" text-anchor="end">MCP</text>
+<rect x="168" y="128" width="470" height="26" rx="5" fill="#c2660c"/>
+<text x="650" y="145" class="val">1,243 tokens, 6 round-trips</text>
+<text x="156" y="183" class="side" text-anchor="end" style="fill:#15803d;font-weight:600">web-tester</text>
+<rect x="168" y="166" width="115" height="26" rx="5" fill="#15803d"/>
+<text x="295" y="183" class="val" style="fill:#15803d">304 tokens, 1 round-trip</text>
+<text x="28" y="224" class="task">Hacker News front page: verify it renders</text>
+<text x="156" y="253" class="side" text-anchor="end">MCP</text>
+<rect x="168" y="236" width="470" height="26" rx="5" fill="#c2660c"/>
+<text x="650" y="253" class="val">10,091 tokens, 1 round-trip</text>
+<text x="156" y="291" class="side" text-anchor="end" style="fill:#15803d;font-weight:600">web-tester</text>
+<rect x="168" y="274" width="10" height="26" rx="5" fill="#15803d"/>
+<text x="190" y="291" class="val" style="fill:#15803d">216 tokens, 1 round-trip</text></svg>

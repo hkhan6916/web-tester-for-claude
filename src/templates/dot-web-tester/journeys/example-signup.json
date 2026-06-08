@@ -1,0 +1,17 @@
+{
+  "description": "Example: user signs up and lands on a dashboard. Edit the URL, selectors, and expectations to match your app.",
+  "url": "/signup",
+  "steps": [
+    "wait:networkidle",
+    "fill:input[name=email]=test@example.com",
+    "fill:input[name=password]=hunter2-hunter2",
+    "click:button[type=submit]",
+    "wait:url-contains:/dashboard@15000"
+  ],
+  "expectations": [
+    "text=Welcome",
+    "selector=[data-test=dashboard]"
+  ],
+  "failOn": "http-5xx",
+  "persistMs": 0
+}

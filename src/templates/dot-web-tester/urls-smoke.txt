@@ -1,0 +1,19 @@
+# urls-smoke.txt — high-value pages to sweep on any structural change.
+#
+# One path per line. `#pack=<name>` annotations apply a built-in expectation
+# pack to that URL. Built-in packs:
+#   homepage    — header + footer present
+#   static      — header + footer present
+#   category    — header + footer + at least one internal anchor with an <img> in <main>
+#   has-main    — <main> present
+#   has-h1      — <h1> present
+#
+# Run:  web-tester sweep --preset smoke --fail-on http-5xx
+#
+# These are placeholders — replace with your real routes (or generate this
+# file with `web-tester map`).
+
+/                                  #pack=homepage
+/about                             #pack=static
+/pricing                           #pack=has-h1
+/contact                           #pack=static

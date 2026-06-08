@@ -1,0 +1,36 @@
+{
+  "$comment": "Maps changed file paths to web-tester sweeps/journeys to check. `web-tester impact` runs git diff against --base (default origin/main) and executes whatever rules match. Advisory only — never blocks a push. These are EXAMPLES — edit the globs and targets to match your project, then add rules as you find sensitive areas. Run `web-tester map` to discover routes worth covering.",
+  "rules": [
+    {
+      "name": "Shared layout changed — sweep top pages",
+      "when_changed_any": [
+        "src/components/Layout/**",
+        "src/components/Header/**",
+        "src/components/Footer/**",
+        "**/layout.tsx"
+      ],
+      "sweep": {
+        "preset": "smoke"
+      }
+    },
+    {
+      "name": "Auth code changed — sign-up journey",
+      "when_changed_any": [
+        "src/auth/**",
+        "**/api/auth/**"
+      ],
+      "journey": "example-signup"
+    },
+    {
+      "name": "Routing / data-fetching plumbing — sweep key pages",
+      "when_changed_any": [
+        "src/lib/**",
+        "src/middleware.ts"
+      ],
+      "sweep": {
+        "urls": ["/", "/pricing"],
+        "packs": ["homepage", "static"]
+      }
+    }
+  ]
+}
