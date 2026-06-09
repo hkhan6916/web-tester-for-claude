@@ -1,6 +1,6 @@
 {
   "name": "web-tester-for-claude",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "description": "Drive your dev site in Playwright, map it, capture console + network + DOM + screenshots + video, write one structured report. Built for AI coding agents and humans.",
   "keywords": [
     "playwright",

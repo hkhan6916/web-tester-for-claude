@@ -51,9 +51,12 @@ guided by what the run shows.
 ## Before you write a `--step` chain from scratch
 
 Run `web-tester kb` first — the project's recipes live there. Step grammar
-gotchas: `click:` takes a Playwright CSS locator (not `role=`); `settle` only
-does something on pages with `[data-attr-name]` markers — otherwise prefer
-`wait:networkidle`. Run `web-tester help` for the full grammar.
+gotchas: `click:` takes a Playwright CSS locator (not `role=`); if a `click:`
+times out on a covered or mid-animation element, use `force-click:` (dispatches
+a DOM click, skips actionability checks) instead of reaching for `eval`; when
+`wait:networkidle` never settles, wait on the real condition with
+`wait:js:<expr>`; `settle` only does something on pages with `[data-attr-name]`
+markers. Run `web-tester help` for the full grammar.
 
 ## Don't
 

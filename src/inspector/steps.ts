@@ -7,11 +7,12 @@ export type WaitTarget =
   | { kind: "selector"; selector: string }
   | { kind: "text"; text: string }
   | { kind: "urlStable"; quietMs: number }
-  | { kind: "urlContains"; substring: string; timeoutMs: number };
+  | { kind: "urlContains"; substring: string; timeoutMs: number }
+  | { kind: "predicate"; expression: string };
 
 export type Step =
   | { kind: "goto"; url: string }
-  | { kind: "click"; selector: string }
+  | { kind: "click"; selector: string; nth: number; force: boolean }
   | { kind: "fill"; selector: string; value: string }
   | { kind: "reactFill"; selector: string; value: string }
   | { kind: "press"; selector: string; key: string }
@@ -60,6 +61,21 @@ function splitSelectorValue(
 }
 
 /**
+ * Parse a click argument: an optional `nth=<n>:` prefix picks which match to
+ * act on (default the first), the rest is the selector. `nth=2:button.card`
+ * targets the third match; a plain selector targets the first. The prefix is
+ * unambiguous because no valid CSS selector starts with `nth=<digits>:`.
+ */
+function parseClickArg(arg: string, force: boolean): Step {
+  const label = force ? "force-click" : "click";
+  if (!arg) throw new Error(`\`${label}\` needs a selector`);
+  const m = /^nth=(\d+):/.exec(arg);
+  const selector = m ? arg.slice(m[0].length) : arg;
+  if (!selector) throw new Error(`\`${label}\` needs a selector after nth=<n>:`);
+  return { kind: "click", selector, nth: m ? Number(m[1]) : 0, force };
+}
+
+/**
  * Parse a `--step <type>:<arg>` shorthand into a typed step.
  *
  * Examples:
@@ -69,7 +85,10 @@ function splitSelectorValue(
  *   "wait:2000"                                   → wait ms
  *   "wait:#cta"                                   → wait selector
  *   "wait:text=Submit"                            → wait text
+ *   "wait:js:window.cartReady === true"           → wait until a JS expr is truthy
  *   "click:button:has-text(\"Submit\")"           → click (note: selector may contain `:`)
+ *   "click:nth=2:.product-card a"                 → click the third match
+ *   "force-click:button.add-to-bag"               → click, skipping actionability checks
  *   "fill:input[name=email]=user@example.com"     → fill (first `=` after selector splits value)
  *   "screenshot:after-submit"                     → screenshot
  *   "screenshot"                                  → screenshot anonymous
@@ -96,8 +115,9 @@ export function parseStep(raw: string): Step {
       if (!arg) throw new Error("`goto` needs a URL");
       return { kind: "goto", url: arg };
     case "click":
-      if (!arg) throw new Error("`click` needs a selector");
-      return { kind: "click", selector: arg };
+      return parseClickArg(arg, false);
+    case "force-click":
+      return parseClickArg(arg, true);
     case "hover":
       if (!arg) throw new Error("`hover` needs a selector");
       return { kind: "hover", selector: arg };
@@ -144,6 +164,11 @@ export function parseStep(raw: string): Step {
           kind: "wait",
           target: { kind: "text", text: arg.slice("text=".length) }
         };
+      if (arg.startsWith("js:")) {
+        const expression = arg.slice("js:".length).trim();
+        if (!expression) throw new Error("`wait:js:<expr>` needs a JS expression");
+        return { kind: "wait", target: { kind: "predicate", expression } };
+      }
       if (arg === "url-stable")
         return { kind: "wait", target: { kind: "urlStable", quietMs: 250 } };
       if (arg.startsWith("url-stable=")) {
@@ -219,9 +244,25 @@ export async function executeStep(
     case "reload":
       await page.reload({ waitUntil: "domcontentloaded" });
       return { label: "reload" };
-    case "click":
-      await page.locator(step.selector).first().click({ timeout: DEFAULT_TIMEOUT_MS });
-      return { label: `click ${step.selector}` };
+    case "click": {
+      const target = page.locator(step.selector).nth(step.nth);
+      if (step.force) {
+        // Dispatch a DOM click straight at the element, the way `el.click()`
+        // does in the page. This ignores actionability checks AND overlay
+        // hit-testing, so covered buttons, mid-animation elements, and links
+        // Playwright deems "not stable" still go through. It's the built-in
+        // version of the eval-click workaround. Only waits for the element to
+        // be attached, not visible.
+        await target.dispatchEvent("click", undefined, {
+          timeout: DEFAULT_TIMEOUT_MS
+        });
+      } else {
+        await target.click({ timeout: DEFAULT_TIMEOUT_MS });
+      }
+      const verb = step.force ? "force-click" : "click";
+      const where = step.nth ? ` [nth=${step.nth}]` : "";
+      return { label: `${verb} ${step.selector}${where}` };
+    }
     case "hover":
       await page.locator(step.selector).first().hover({ timeout: DEFAULT_TIMEOUT_MS });
       return { label: `hover ${step.selector}` };
@@ -302,6 +343,30 @@ export async function executeStep(
       if (t.kind === "selector") {
         await page.locator(t.selector).first().waitFor({ timeout: DEFAULT_TIMEOUT_MS });
         return { label: `wait selector ${t.selector}` };
+      }
+      if (t.kind === "predicate") {
+        // Poll a JS expression in the page until it's truthy. Exceptions during
+        // early polls (e.g. a store global that hasn't loaded yet) count as
+        // "not ready" so it keeps waiting, instead of rejecting immediately.
+        // The raw string is evaluated in the page, so esbuild never wraps it
+        // (no `__name` helper) — same reason `eval` passes a string.
+        const guarded = `(()=>{try{return (${t.expression})}catch(e){return false}})()`;
+        try {
+          await page.waitForFunction(guarded, undefined, {
+            timeout: DEFAULT_TIMEOUT_MS
+          });
+        } catch {
+          const current = await page
+            .evaluate(
+              `(()=>{try{return (${t.expression})}catch(e){return "ERR: "+e.message}})()`
+            )
+            .catch(() => "<eval failed>");
+          throw new Error(
+            `wait:js \`${t.expression}\` was not truthy within ${DEFAULT_TIMEOUT_MS}ms ` +
+              `(current value: ${JSON.stringify(current)})`
+          );
+        }
+        return { label: `wait js ${t.expression.slice(0, 50)}` };
       }
       if (t.kind === "urlStable") {
         // Wait for the URL to change at least once, then hold steady for

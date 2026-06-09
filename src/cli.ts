@@ -166,6 +166,11 @@ STEP GRAMMAR — --step can be repeated, executed in order
   wait:url-contains:<sub>[@<ms>]      wait until URL contains <sub>
                                       (default timeout 10000ms; use @ not = so
                                       the substring can contain '=')
+  wait:js:<JS expression>             poll the expression in the page until it
+                                      is truthy (e.g. wait:js:window.cart!=null).
+                                      Errors while waiting count as "not ready",
+                                      so a store global that loads late is fine.
+                                      Beats networkidle on sites that never idle.
   settle[:<ms>]                       wait for data-attr-selected-label to
                                       populate on any [data-attr-name] element.
                                       Fast-paths in ~3s if none are present.
@@ -173,6 +178,13 @@ STEP GRAMMAR — --step can be repeated, executed in order
                                       prefer 'wait:networkidle' instead.
   click:<selector>                    click first match (Playwright locator —
                                       use CSS, optionally with :has-text())
+  click:nth=<n>:<selector>            click the n-th match (0-based) instead of
+                                      the first
+  force-click:<selector>              dispatch a DOM click straight at the
+                                      element (like el.click()). Skips
+                                      actionability + overlay checks, so covered
+                                      or mid-animation elements still go through.
+                                      Also takes nth=<n>:
   hover:<selector>
   fill:<selector>=<value>             native input
   react-fill:<selector>=<value>       React-controlled input (calls native

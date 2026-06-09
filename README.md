@@ -347,6 +347,10 @@ wait:url-stable[=<ms>]              wait until URL changes at least once then
                                     stays still for <ms> (default 250)
 wait:url-contains:<sub>[@<ms>]      wait until URL contains <sub>
                                     (use @ not = so <sub> can include '=')
+wait:js:<JS expression>             poll the expression in the page until it is
+                                    truthy. Errors while waiting count as "not
+                                    ready", so a late-loading global is fine.
+                                    Use this when networkidle never settles.
 settle[:<ms>]                       wait for data-attr-selected-label to
                                     populate on any [data-attr-name] element.
                                     Fast-paths in about 3s if none are present.
@@ -354,6 +358,11 @@ settle[:<ms>]                       wait for data-attr-selected-label to
                                     'wait:networkidle'.
 click:<selector>                    click (Playwright locator; supports CSS
                                     and :has-text())
+click:nth=<n>:<selector>            click the n-th match (0-based), not the first
+force-click:<selector>              dispatch a DOM click at the element (like
+                                    el.click()); skips actionability and overlay
+                                    checks, for covered or mid-animation
+                                    elements. Also takes nth=<n>:
 hover:<selector>
 fill:<selector>=<value>             native input
 react-fill:<selector>=<value>       React-controlled input (calls the native

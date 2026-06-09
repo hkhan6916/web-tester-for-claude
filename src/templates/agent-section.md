@@ -62,6 +62,7 @@ The pattern is: **DOM evidence → state evidence (via logs / `--deep`) → only
 - **Don't blame code when failures span unrelated pages.** If a sweep returns 5xx on routes that don't share the component you changed, the cause is almost certainly environmental, not a code regression. Read `result.json.pageErrors[0].message` — `Cannot find module …` / `ENOENT …` usually means a corrupt dev-server build cache, not your diff.
 - **Don't roll your own probe scripts or spin up a second dev server.** web-tester already captures `network.entries`, `console.entries`, `pageErrors`, and supports the temporary-log pattern above. If you want to write a separate script to capture data, you're off-piste — the tool already covers it.
 - **Don't write `--step` chains from scratch when a recipe exists.** Use `web-tester kb`. The grammar has gotchas — `click:` is a Playwright CSS locator, not `role=`; on apps that don't use the `data-attr-*` convention, prefer `wait:networkidle` over `settle`.
+- **Don't fall back to `eval` clicks when a `click:` times out.** A covered or mid-animation element should use `force-click:<selector>` (dispatches a DOM click, skips actionability checks). When `wait:networkidle` never settles, wait on the real condition with `wait:js:<expr>` instead of fixed sleeps.
 - **Don't `--fail-on page-errors` by default.** Most sites have baseline framework warnings. Use `http-5xx` as the safe default.
 - **Don't leave temporary instrumentation or `DEBUG-REMOVE` edits in.** Edit → run → revert in the same turn. Never commit them.
 

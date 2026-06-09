@@ -52,6 +52,29 @@ WEB_TESTER_BASE_URL=https://staging.example.com \
   web-tester inspect /pricing --quick
 ```
 
+## Gotchas worth knowing
+
+A few things that cost people time. Reach for these before writing `eval`
+workarounds.
+
+- **A `click:` keeps timing out.** The element is probably covered by an
+  overlay, mid-animation, or otherwise "not actionable" to Playwright. Use
+  `force-click:<selector>` instead. It dispatches a DOM click straight at the
+  element (like `el.click()`), skipping the actionability and overlay checks.
+  If a selector matches several elements and the first is the wrong one, target
+  a specific match with `click:nth=<n>:<selector>` (0-based).
+- **`wait:networkidle` never settles.** Sites with long-lived connections
+  (websockets, polling, analytics keep-alives) never reach network idle, so the
+  step burns the whole timeout. Wait on the actual condition instead:
+  `wait:js:<expr>` polls a JS expression until it is truthy, e.g.
+  `wait:js:window.__store.getState().price != null`. It beats both `networkidle`
+  and fixed `wait:<ms>` sleeps.
+- **An analytics or tracking POST is missing from `network.entries`.**
+  `navigator.sendBeacon()` and batched senders (Segment and similar) don't show
+  up in the captured network log. Run with `--deep` to capture request and
+  response bodies, or log the payload in the page and read it back from
+  `console.entries`.
+
 ## Sibling files in `.web-tester/`
 
 - `impact-rules.json` — diff-aware rules for `web-tester impact`.
